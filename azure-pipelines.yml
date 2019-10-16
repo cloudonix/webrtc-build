@@ -53,3 +53,18 @@ steps:
       ninja -C out/ios_${arch} apprtc_signaling
     done
   displayName: Building
+
+- script: |
+    set -ex
+    mkdir -p tmp-output ${}/libs ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers"
+    for arch in arm arm64 x64; do
+      cp src/out/ios_${arch}/obj/libwebrtc.a  tmp-output/libwebrtc-${arch}.a"
+    done
+    lipo -create tmp-output/*  -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/libwebrtc.a"
+    find src -name "*.h" -print | tar --create --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar xvfp -)
+  displayName: Bundle
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: webrtc
