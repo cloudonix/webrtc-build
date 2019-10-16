@@ -1,0 +1,98 @@
+From 197194616356b270e13b05b8bd379c2ecefe3651 Mon Sep 17 00:00:00 2001
+From: Igor Nazarov <igor.nazarov.1991@gmail.com>
+Date: Thu, 17 Aug 2017 13:47:10 +0300
+Subject: [PATCH] Apply patch for Objc categories and. Disable problematic log
+ inside RTCCameraVideoCapturer.
+
+---
+ .../objc/Framework/Classes/Audio/RTCAudioSession+Configuration.mm  | 1 +
+ .../objc/Framework/Classes/Audio/RTCAudioSessionConfiguration.m    | 7 +++++++
+ webrtc/sdk/objc/Framework/Classes/Common/UIDevice+RTCDevice.mm     | 2 ++
+ .../objc/Framework/Classes/PeerConnection/RTCCameraVideoCapturer.m | 2 +-
+ webrtc/sdk/objc/Framework/Headers/WebRTC/RTCAudioSession.h         | 2 ++
+ webrtc/sdk/objc/Framework/Headers/WebRTC/UIDevice+RTCDevice.h      | 2 ++
+ 6 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSession+Configuration.mm b/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSession+Configuration.mm
+index c4d0d0c..4305177 100644
+--- a/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSession+Configuration.mm
++++ b/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSession+Configuration.mm
+@@ -14,6 +14,7 @@
+ #import "WebRTC/RTCLogging.h"
+ #import "RTCAudioSession+Private.h"
+ 
++NSString* RTCAudioSessionConfigurationCategory;
+ 
+ @implementation RTCAudioSession (Configuration)
+ 
+diff --git a/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSessionConfiguration.m b/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSessionConfiguration.m
+index 3bcb034..5f06dbb 100644
+--- a/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSessionConfiguration.m
++++ b/webrtc/sdk/objc/Framework/Classes/Audio/RTCAudioSessionConfiguration.m
+@@ -131,4 +131,11 @@ static RTCAudioSessionConfiguration *gWebRTCConfiguration = nil;
+   }
+ }
+ 
++__attribute__((used)) static void importCategories () {
++    id x = UIDeviceRTCDeviceCategory;
++    id y = RTCAudioSessionConfigurationCategory;
++    NSLog(@"%@", x);
++    NSLog(@"%@", y);
++}
++
+ @end
+diff --git a/webrtc/sdk/objc/Framework/Classes/Common/UIDevice+RTCDevice.mm b/webrtc/sdk/objc/Framework/Classes/Common/UIDevice+RTCDevice.mm
+index 94faf53..cf9a4c7 100644
+--- a/webrtc/sdk/objc/Framework/Classes/Common/UIDevice+RTCDevice.mm
++++ b/webrtc/sdk/objc/Framework/Classes/Common/UIDevice+RTCDevice.mm
+@@ -13,6 +13,8 @@
+ #include <memory>
+ #include <sys/sysctl.h>
+ 
++NSString * UIDeviceRTCDeviceCategory;
++
+ @implementation UIDevice (RTCDevice)
+ 
+ + (RTCDeviceType)deviceType {
+diff --git a/webrtc/sdk/objc/Framework/Classes/PeerConnection/RTCCameraVideoCapturer.m b/webrtc/sdk/objc/Framework/Classes/PeerConnection/RTCCameraVideoCapturer.m
+index a2290c2..687e5ba 100644
+--- a/webrtc/sdk/objc/Framework/Classes/PeerConnection/RTCCameraVideoCapturer.m
++++ b/webrtc/sdk/objc/Framework/Classes/PeerConnection/RTCCameraVideoCapturer.m
+@@ -121,7 +121,7 @@ static inline BOOL IsMediaSubTypeSupported(FourCharCode mediaSubType) {
+   [RTCDispatcher
+       dispatchAsyncOnType:RTCDispatcherTypeCaptureSession
+                     block:^{
+-                      RTCLogInfo("startCaptureWithDevice %@ @ %zd fps", format, fps);
++//                      RTCLogInfo("startCaptureWithDevice %@ @ %zd fps", format, fps);
+ 
+ #if TARGET_OS_IPHONE
+                       [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+diff --git a/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCAudioSession.h b/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCAudioSession.h
+index f99c835..a0dd317 100644
+--- a/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCAudioSession.h
++++ b/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCAudioSession.h
+@@ -226,6 +226,8 @@ RTC_EXPORT
+                       error:(NSError **)outError;
+ @end
+ 
++extern NSString* RTCAudioSessionConfigurationCategory;
++
+ @interface RTCAudioSession (Configuration)
+ 
+ /** Applies the configuration to the current session. Attempts to set all
+diff --git a/webrtc/sdk/objc/Framework/Headers/WebRTC/UIDevice+RTCDevice.h b/webrtc/sdk/objc/Framework/Headers/WebRTC/UIDevice+RTCDevice.h
+index 29e4801..c406fe4 100644
+--- a/webrtc/sdk/objc/Framework/Headers/WebRTC/UIDevice+RTCDevice.h
++++ b/webrtc/sdk/objc/Framework/Headers/WebRTC/UIDevice+RTCDevice.h
+@@ -55,6 +55,8 @@ typedef NS_ENUM(NSInteger, RTCDeviceType) {
+   RTCDeviceTypeSimulatorx86_64,
+ };
+ 
++extern NSString *UIDeviceRTCDeviceCategory;
++
+ @interface UIDevice (RTCDevice)
+ 
+ + (RTCDeviceType)deviceType;
+-- 
+2.8.1
+
