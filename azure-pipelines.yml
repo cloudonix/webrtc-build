@@ -14,7 +14,7 @@ steps:
 
 - script: |
     echo Syncing sources
-    set -x
+    set -ex
     export PATH=$PATH:${PWD}/depot_tools
     fetch --nohooks webrtc_ios
     gclient sync
@@ -24,7 +24,7 @@ steps:
 
 - script: |
     echo Patching
-    set -x
+    set -ex
     cd src
     for file in ../patches/*; do
       patch -p1 -i "$file"
@@ -33,7 +33,7 @@ steps:
 
 - script: |
     echo Preparing source tree
-    set -x
+    set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
     for arch in arm arm64 x86 x64; do
@@ -43,7 +43,7 @@ steps:
 
 - script: |
     echo Building
-    set -x
+    set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
     for arch in arm arm64 x86 x64; do
