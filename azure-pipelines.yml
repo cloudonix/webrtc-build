@@ -25,7 +25,8 @@ steps:
 - script: |
     echo Patching
     set -x
-    for file in patches/*; do
+    cd src
+    for file in ../patches/*; do
       patch -p1 -i "$file"
     done
   displayName: Patching
