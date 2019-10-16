@@ -19,7 +19,7 @@ steps:
     gclient sync
     (cd src; git checkout c2c150bdf3a30d669b0d975e82c0829011888fa3)
     gclient sync
-  displayName: Checkout
+  displayName: Sync sources
 
 - script: |
     echo Preparing source tree
