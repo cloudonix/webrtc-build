@@ -36,7 +36,7 @@ steps:
     set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
-    for arch in arm arm64 x86 x64; do
+    for arch in arm arm64 x64; do
       gn gen out/ios_${arch} --args='target_os="ios" ios_enable_code_signing=false target_cpu="'"${arch}"'"'
     done
   displayName: Preparing
@@ -46,7 +46,7 @@ steps:
     set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
-    for arch in arm arm64 x86 x64; do
+    for arch in arm arm64 x64; do
       ninja -C out/ios_${arch} socketrocket
       ninja -C out/ios_${arch} rtc_sdk_objc
       ninja -C out/ios_${arch} apprtc_common
