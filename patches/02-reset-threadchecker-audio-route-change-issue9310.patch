@@ -1,3 +1,24 @@
+diff --git a/webrtc/modules/audio_device/audio_device_buffer.cc b/webrtc/modules/audio_device/audio_device_buffer.cc
+index 8227d5b077..ba16e8d531 100644
+--- a/webrtc/modules/audio_device/audio_device_buffer.cc
++++ b/webrtc/modules/audio_device/audio_device_buffer.cc
+@@ -260,6 +260,16 @@ int32_t AudioDeviceBuffer::SetTypingStatus(bool typing_status) {
+   return 0;
+ }
+ 
++void AudioDeviceBuffer::NativeAudioPlayoutInterrupted() {
++  RTC_DCHECK(main_thread_checker_.CalledOnValidThread());
++  playout_thread_checker_.DetachFromThread();
++}
++
++void AudioDeviceBuffer::NativeAudioRecordingInterrupted() {
++  RTC_DCHECK(main_thread_checker_.CalledOnValidThread());
++  recording_thread_checker_.DetachFromThread();
++}
++
+ uint32_t AudioDeviceBuffer::NewMicLevel() const {
+   RTC_DCHECK_RUN_ON(&recording_thread_checker_);
+   return new_mic_level_;
 diff --git a/webrtc/modules/audio_device/ios/audio_device_ios.h b/webrtc/modules/audio_device/ios/audio_device_ios.h
 index 641aba0891..2f42927de5 100644
 --- a/webrtc/modules/audio_device/ios/audio_device_ios.h
