@@ -7,9 +7,35 @@ pool:
   vmImage: 'macOS 10.13'
 
 steps:
-- task: Xcode@5
-  inputs:
-    scheme: ''
-    sdk: 'iphoneos'
-    configuration: 'Release'
-    xcodeVersion: 'default' # Options: 8, 9, default, specifyPath
+- script: |
+    echo Setting up depot_tools
+    git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+  displayName: Setup
+
+- script: |
+    echo Syncing sources
+    export PATH=$PATH:${PWD}/depot_tools
+    fetch --nohooks webrtc_ios
+    gclient sync
+    (cd src; git checkout c2c150bdf3a30d669b0d975e82c0829011888fa3)
+    gclient sync
+  displayName: Checkout
+
+- script: |
+    echo Preparing source tree
+    export PATH=$PATH:${PWD}/depot_tools
+    gn gen out/ios_arm --args='target_os="ios" ios_enable_code_signing=false target_cpu="arm"'
+    gn gen out/ios_arm64 --args='target_os="ios" ios_enable_code_signing=false  target_cpu="arm64"'
+    gn gen out/ios_x86 --args='target_os="ios" ios_enable_code_signing=false target_cpu="x86"'
+    gn gen out/ios_x64 --args='target_os="ios" ios_enable_code_signing=false target_cpu="x64"'
+  displayName: Preparing
+
+- script: |
+    echo Building
+    for arch in arm arm64 x86 x64; do
+      ninja -C out/ios_${arch} socketrocket
+      ninja -C out/ios_${arch} rtc_sdk_objc
+      ninja -C out/ios_${arch} apprtc_common
+      ninja -C out/ios_${arch} apprtc_signaling
+    done
+  displayName: Building
