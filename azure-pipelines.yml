@@ -22,6 +22,12 @@ steps:
   displayName: Sync sources
 
 - script: |
+    for file in patches/*; do
+      patch -p1 -i "$file"
+    done
+  displayName: Patching
+
+- script: |
     echo Preparing source tree
     export PATH=$PATH:${PWD}/depot_tools
     gn gen out/ios_arm --args='target_os="ios" ios_enable_code_signing=false target_cpu="arm"'
