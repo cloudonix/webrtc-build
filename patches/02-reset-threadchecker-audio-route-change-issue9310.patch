@@ -1,0 +1,54 @@
+diff --git a/webrtc/modules/audio_device/ios/audio_device_ios.h b/webrtc/modules/audio_device/ios/audio_device_ios.h
+index 641aba0891..2f42927de5 100644
+--- a/webrtc/modules/audio_device/ios/audio_device_ios.h
++++ b/webrtc/modules/audio_device/ios/audio_device_ios.h
+@@ -223,6 +223,9 @@ class AudioDeviceIOS : public AudioDeviceGeneric,
+   // Closes and deletes the voice-processing I/O unit.
+   void ShutdownPlayOrRecord();
+ 
++  // Resets thread-checkers before a call is restarted.
++  void PrepareForNewStart();
++
+   // Ensures that methods are called from the same thread as this object is
+   // created on.
+   rtc::ThreadChecker thread_checker_;
+diff --git a/webrtc/modules/audio_device/ios/audio_device_ios.mm b/webrtc/modules/audio_device/ios/audio_device_ios.mm
+index 1d59aff467..ef63d338ad 100644
+--- a/webrtc/modules/audio_device/ios/audio_device_ios.mm
++++ b/webrtc/modules/audio_device/ios/audio_device_ios.mm
+@@ -555,6 +555,7 @@ void AudioDeviceIOS::HandleInterruptionBegin() {
+     if (!audio_unit_->Stop()) {
+       RTCLogError(@"Failed to stop the audio unit for interruption begin.");
+     }
++    PrepareForNewStart();
+   }
+   is_interrupted_ = true;
+ }
+@@ -637,6 +638,7 @@ void AudioDeviceIOS::HandleSampleRateChange(float sample_rate) {
+   if (audio_unit_->GetState() == VoiceProcessingAudioUnit::kStarted) {
+     audio_unit_->Stop();
+     restart_audio_unit = true;
++    PrepareForNewStart();
+   }
+   if (audio_unit_->GetState() == VoiceProcessingAudioUnit::kInitialized) {
+     audio_unit_->Uninitialize();
+@@ -952,4 +954,19 @@ void AudioDeviceIOS::ShutdownPlayOrRecord() {
+   [session unlockForConfiguration];
+ }
+ 
++void AudioDeviceIOS::PrepareForNewStart() {
++  LOGI() << "PrepareForNewStart";
++  // The audio unit has been stopped and preparations are needed for an upcoming
++  // restart. It will result in audio callbacks from a new native I/O thread
++  // which means that we must detach thread checkers here to be prepared for an
++  // upcoming new audio stream.
++  io_thread_checker_.DetachFromThread();
++  // The audio device buffer must also be informed about the interrupted
++  // state so it can detach its thread checkers as well.
++  if (audio_device_buffer_) {
++    audio_device_buffer_->NativeAudioPlayoutInterrupted();
++    audio_device_buffer_->NativeAudioRecordingInterrupted();
++  }
++}
++
+ }  // namespace webrtc
