@@ -11,6 +11,7 @@ steps:
     echo Setting up depot_tools
     git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
   displayName: Setup
+  timeoutInMinutes: 0
 
 - script: |
     echo Syncing sources
@@ -21,6 +22,7 @@ steps:
     (cd src; git checkout c2c150bdf3a30d669b0d975e82c0829011888fa3)
     gclient sync
   displayName: Sync sources
+  timeoutInMinutes: 0
 
 - script: |
     echo Patching
@@ -30,29 +32,32 @@ steps:
       patch -p1 -i "$file"
     done
   displayName: Patching
+  timeoutInMinutes: 0
 
 - script: |
     echo Preparing source tree
     set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
-    for arch in arm arm64 x64; do
+    for arch in arm arm64 x86 x64; do
       gn gen out/ios_${arch} --args='target_os="ios" ios_enable_code_signing=false target_cpu="'"${arch}"'"'
     done
   displayName: Preparing
+  timeoutInMinutes: 0
 
 - script: |
     echo Building
     set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
-    for arch in arm arm64 x64; do
+    for arch in arm arm64 x86 x64; do
       ninja -C out/ios_${arch} socketrocket
       ninja -C out/ios_${arch} rtc_sdk_objc
       ninja -C out/ios_${arch} apprtc_common
       ninja -C out/ios_${arch} apprtc_signaling
     done
   displayName: Building
+  timeoutInMinutes: 0
 
 - script: |
     set -ex
@@ -63,6 +68,7 @@ steps:
     lipo -create tmp-output/*  -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/libwebrtc.a"
     find src -name "*.h" -print | tar --create --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar xvfp -)
   displayName: Bundle
+  timeoutInMinutes: 0
 
 - task: PublishBuildArtifacts@1
   inputs:
