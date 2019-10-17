@@ -63,6 +63,7 @@ steps:
     set -ex
     mkdir -p tmp-output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers
     for arch in arm arm64 x64; do
+      find src/out/ios_${arch}
       cp src/out/ios_${arch}/obj/webrtc/libwebrtc.a tmp-output/libwebrtc-${arch}.a
     done
     lipo -create tmp-output/* -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/libwebrtc.a
