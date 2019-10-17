@@ -63,10 +63,10 @@ steps:
     set -ex
     mkdir -p tmp-output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers"
     for arch in arm arm64 x64; do
-      cp src/out/ios_${arch}/obj/libwebrtc.a  tmp-output/libwebrtc-${arch}.a"
+      cp src/out/ios_${arch}/obj/libwebrtc.a tmp-output/libwebrtc-${arch}.a
     done
-    lipo -create tmp-output/*  -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/libwebrtc.a"
-    find src -name "*.h" -print | tar --create --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar xvfp -)
+    lipo -create tmp-output/* -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/libwebrtc.a
+    find src -name "*.h" -print | tar -c --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar -xvp)
   displayName: Bundle
   timeoutInMinutes: 0
 
