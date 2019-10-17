@@ -66,9 +66,11 @@ steps:
       find src/out/ios_${arch} -name '*.a' | while read path; do
         filename="$(basename $path)"
         cp "$path" tmp-output/${filename%%.a}-${arch}.a
+        echo ${filename%%.a}
       done
+    done | sort -u | while read fname; do
+      lipo -create tmp-output/${fname}-* -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/${fname}.a
     done
-    lipo -create tmp-output/* -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/libwebrtc.a
     find src -name "*.h" -print | tar -c --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar -xvp)
   displayName: Bundle
   timeoutInMinutes: 0
