@@ -61,7 +61,7 @@ steps:
 
 - script: |
     set -ex
-    mkdir -p tmp-output ${}/libs ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers"
+    mkdir -p tmp-output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers"
     for arch in arm arm64 x64; do
       cp src/out/ios_${arch}/obj/libwebrtc.a  tmp-output/libwebrtc-${arch}.a"
     done
