@@ -6,9 +6,6 @@
 pool:
   vmImage: 'macOS 10.13'
 
-parameters:
-  timeoutInMinutes: 360
-
 steps:
 - script: |
     echo Setting up depot_tools
