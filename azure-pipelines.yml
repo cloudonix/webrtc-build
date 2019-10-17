@@ -6,6 +6,9 @@
 pool:
   vmImage: 'macOS 10.13'
 
+parameters:
+  timeoutInMinutes: 360
+
 steps:
 - script: |
     echo Setting up depot_tools
@@ -50,7 +53,7 @@ steps:
     set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
-    for arch in arm arm64 x64; do
+    for arch in arm arm64 x86 x64; do
       ninja -C out/ios_${arch} socketrocket
       ninja -C out/ios_${arch} rtc_sdk_objc
       ninja -C out/ios_${arch} apprtc_common
