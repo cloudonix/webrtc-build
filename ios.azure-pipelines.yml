@@ -66,6 +66,7 @@ steps:
       find src/out/ios_${arch} -name '*.a' | while read path; do
         filename="$(basename $path)"
         cp "$path" tmp-output/${filename%%.a}-${arch}.a
+      done
     done
     lipo -create tmp-output/* -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/libwebrtc.a
     find src -name "*.h" -print | tar -c --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar -xvp)
