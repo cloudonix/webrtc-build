@@ -3,6 +3,9 @@
 # Add steps that install certificates, test, sign, and distribute the app, save build artifacts, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/xcode
 
+variables:
+  GIT_COMMIT: c2c150bdf3a30d669b0d975e82c0829011888fa3
+
 pool:
   vmImage: 'macOS 10.13'
 
@@ -19,8 +22,9 @@ steps:
     export PATH=$PATH:${PWD}/depot_tools
     fetch --nohooks webrtc_ios
     gclient sync
-    (cd src; git checkout c2c150bdf3a30d669b0d975e82c0829011888fa3)
-    gclient sync
+    ( cd src; git checkout $(GIT_COMMIT) )
+    gclient sync -D
+    gclient runhooks
   displayName: Sync sources
   timeoutInMinutes: 0
 
@@ -35,22 +39,12 @@ steps:
   timeoutInMinutes: 0
 
 - script: |
-    echo Preparing source tree
-    set -ex
-    export PATH=$PATH:${PWD}/depot_tools
-    cd src
-    for arch in arm arm64 x86 x64; do
-      gn gen out/ios_${arch} --args='target_os="ios" ios_enable_code_signing=false target_cpu="'"${arch}"'"'
-    done
-  displayName: Preparing
-  timeoutInMinutes: 0
-
-- script: |
     echo Building
     set -ex
     export PATH=$PATH:${PWD}/depot_tools
     cd src
     for arch in arm arm64 x64; do
+      gn gen out/ios_${arch} --args='target_os="ios" ios_enable_code_signing=false target_cpu="'"${arch}"'"'
       ninja -C out/ios_${arch} socketrocket
       ninja -C out/ios_${arch} rtc_sdk_objc
       ninja -C out/ios_${arch} apprtc_common
@@ -68,7 +62,7 @@ steps:
         cp "$path" tmp-output/${filename%%.a}-${arch}.a
         echo ${filename%%.a}
       done
-    done | sort -u | while read fname; do
+    done | sort -u | egrep -v 'libprotobuf_full|libprotoc_lib|libyasm_utils' while read fname; do
       lipo -create tmp-output/${fname}-* -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/${fname}.a
     done
     find src -name "*.h" -print | tar -c --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar -xvp)
