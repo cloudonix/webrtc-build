@@ -71,3 +71,14 @@ jobs:
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)'
       artifactName: webrtc
+
+- job: ios-release
+  steps:
+  - task: UniversalPackages@0
+    displayName: Universal Publish
+    inputs:
+      command: publish
+      publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      vstsFeedPublish: webrtc
+      vstsFeedPackagePublish: webrtc
+      packagePublishDescription: WebRTC iOS release
