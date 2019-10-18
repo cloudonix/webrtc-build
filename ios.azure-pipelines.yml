@@ -10,7 +10,7 @@ pool:
   vmImage: 'macOS 10.13'
 
 jobs:
-- job: ios-build
+- job: ios_build
   timeoutInMinutes: 0
   steps:
   - script: |
