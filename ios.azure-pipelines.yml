@@ -72,7 +72,7 @@ jobs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)'
       artifactName: webrtc
 
-- job: ios-release
+- job: ios_release
   steps:
   - task: UniversalPackages@0
     displayName: Universal Publish
