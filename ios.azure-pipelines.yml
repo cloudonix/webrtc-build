@@ -62,7 +62,7 @@ steps:
         cp "$path" tmp-output/${filename%%.a}-${arch}.a
         echo ${filename%%.a}
       done
-    done | sort -u | egrep -v 'libprotobuf_full|libprotoc_lib|libyasm_utils' while read fname; do
+    done | sort -u | egrep -v 'libprotobuf_full|libprotoc_lib|libyasm_utils' | while read fname; do
       lipo -create tmp-output/${fname}-* -output ${BUILD_ARTIFACTSTAGINGDIRECTORY}/libs/${fname}.a
     done
     find src -name "*.h" -print | tar -c --files-from - | (cd ${BUILD_ARTIFACTSTAGINGDIRECTORY}/headers && tar -xvp)
